@@ -56,3 +56,4 @@ def write_log(loggername):
     return logger
     # write_log('api').warning("Validate error: %s" % traceback.format_exc())
 
+    
