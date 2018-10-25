@@ -5,7 +5,7 @@ from six.moves import http_client
 from six.moves import urllib
 from wsgiref.headers import Headers
 from wsgi_server import WSGIServer
-from middleware import TestMiddle, token_auth, get_validate
+from middleware import TestMiddle, get_validate
 
 
 class UppercaseMiddleware(object):
@@ -145,4 +145,6 @@ class Application(object):
         start_response(response.status, response.headers.items())
 
         return iter(response)
+
+app = Application()
 
