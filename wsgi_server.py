@@ -27,6 +27,11 @@ class Worker(object):
         # self.client.setblocking(True)
         self.handle_request()
 
+    # def serve_forever(self):
+    #     while 1:
+    #         self.connection, client_address = self.socket.accept()
+    #         self.handle_request()
+
     def init_process(self):
         # self.socket.setblocking(False)
         while True:
