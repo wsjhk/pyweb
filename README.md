@@ -16,7 +16,7 @@
   
 扩展方向：
 
-  1.web服务器使用epoll模型,实现IO多路复用。
+  1.web服务器使用epoll模型,实现IO多路复用,master管理worker进程的加减，reload功能的实现。
   
   2.实现访问模板等静态文件。
   
