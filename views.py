@@ -25,7 +25,8 @@ class View(object):
         return view
 
     def dispatch_request(self, *args, **kwargs):
-        meth = getattr(self, 'get', None)
+        request = args[0]
+        meth = getattr(self, request.method.lower(), None)
         assert meth is not None, 'Unimplemented method'
         return meth(*args, **kwargs)
 
@@ -36,5 +37,9 @@ class CBV(View):
     decorators = ()
 
     def get(self, request, name):
-        return "<h1>CBV, {name}!</h1>".format(name=name)
+        method = request.method
+        return "<h1>CBV {method}, {name}!</h1>".format(method = method, name = name)
 
+    def post(self, request, name):
+        method = request.method
+        return "<h1>CBV {method}, {name}!</h1>".format(method = method, name = name)
