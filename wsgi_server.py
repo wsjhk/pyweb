@@ -4,9 +4,9 @@ from __future__ import unicode_literals
 import StringIO
 import datetime
 import socket
+import select
 import sys
-import os
-import time
+import os, Queue
 import traceback
 import errno
 import signal
@@ -22,26 +22,17 @@ class Worker(object):
         self.host = host
         self.port = port
 
-    def accept(self):
-        self.client, addr = self.socket.accept()
-        # self.client.setblocking(True)
-        self.handle_request()
-
-    # def serve_forever(self):
-    #     while 1:
-    #         self.connection, client_address = self.socket.accept()
-    #         self.handle_request()
-
+    #在每个worker上执行 accept() 高并发下该方法阻塞严重
     def init_process(self):
-        # self.socket.setblocking(False)
         while True:
             try:
-                time.sleep(1)
-                self.accept()
+                self.client, addr = self.socket.accept()
+                self.client.setblocking(False)
+                self.handle_request(self.client, self.client.recv(1024))
                 continue
             except Exception as e:
                 msg = traceback.format_exc()
-                with open("sub_" + str(os.getpid()) + ".txt","a") as f:
+                with open("sub_" + str(os.getpid()) + ".txt", "a") as f:
                     f.write(msg+"\n")
                 if hasattr(e, "errno"):
                     if e.errno not in (errno.EAGAIN, errno.ECONNABORTED, errno.EWOULDBLOCK):
@@ -49,14 +40,20 @@ class Worker(object):
                 else:
                     raise
 
-    def handle_request(self):
-        self.request_data = self.client.recv(1024)
+    #多worker异步阻塞方式，高并发
+    def select_process(self, q):
+        while True:
+            client_sock = q.get()
+            self.handle_request(client_sock, client_sock.recv(1024))
+
+    def handle_request(self, sock, data):
+        self.request_data = data
         self.request_lines = self.request_data.splitlines()
         try:
             self.get_url_parameter()
             env = self.get_environ()
             app_data = self.application(env, self.start_response)
-            self.finish_response(app_data)
+            self.finish_response(sock, app_data)
             print '[{0}] "{1}" {2}'.format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                                            self.request_lines[0], self.status)
         except Exception, e:
@@ -95,7 +92,7 @@ class Worker(object):
         self.headers = response_headers + headers
         self.status = status
 
-    def finish_response(self, app_data):
+    def finish_response(self, s, app_data):
         try:
             response = 'HTTP/1.1 {status}\r\n'.format(status=self.status)
             for header in self.headers:
@@ -103,9 +100,10 @@ class Worker(object):
             response += '\r\n'
             for data in app_data:
                 response += data
-            self.client.sendall(response)
+            # self.client.sendall(response)
+            s.send(response)
         finally:
-            self.client.close()
+            s.close() #self.client.close()
 
 
 class WSGIServer(object):
@@ -116,13 +114,14 @@ class WSGIServer(object):
     def __init__(self, address):
         self.socket = socket.socket(self.socket_family, self.socket_type)
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.socket.setblocking(False)
         self.socket.bind(address)
         self.socket.listen(self.request_queue_size)
         host, port = self.socket.getsockname()[:2]
         self.host = host
         self.port = port
         self.WORKERS = {}
-
+        self.queue = Queue.Queue()
         # self.sysstr = platform.system()
         # if (self.sysstr == "Windows"):
         #     self.WNOHANG = os.WNOHANG
@@ -154,6 +153,19 @@ class WSGIServer(object):
         #     except os.error:
         #         print("error")
 
+        inputs, outputs = [self.socket, ], []
+        while True:
+            readable, writable, exceptional = select.select(inputs, outputs, inputs)
+            for s in readable:
+                if s is self.socket:
+                    # 多进行多线程时惊群问题，Lock锁不能解决惊群问题，会使得惊群问题转移到unlock操作上。使用队列分配sock来解决惊群问题
+                    connection, client_address = s.accept()
+                    connection.setblocking(False)
+                    inputs.append(connection)
+                else:
+                    self.queue.put(s)
+                    inputs.remove(s)
+
     # def init_signals(self):
     #     signal.signal(signal.SIGTTIN, self.incr_one)
     #     signal.signal(signal.SIGTTOU, self.decr_one)
@@ -180,7 +192,10 @@ class WSGIServer(object):
         # worker.pid = os.getpid()
         # worker.init_process()
         # sys.exit(0)
-        work = Thread(target=worker.init_process)
+
+
+        # work = Thread(target=worker.init_process)
+        work = Thread(target=worker.select_process, args=(self.queue,))
         work.start()
 
 
