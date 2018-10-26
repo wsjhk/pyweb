@@ -22,7 +22,7 @@ class Worker(object):
         self.host = host
         self.port = port
 
-    #在每个worker上执行 accept() 高并发下该方法阻塞严重
+    #在每个worker上执行 accept() 高并发下该方法阻塞严重，存在惊群效应
     def init_process(self):
         while True:
             try:
