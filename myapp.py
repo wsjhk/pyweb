@@ -4,12 +4,14 @@ from pyweb import app, Response
 from middleware import token_auth
 
 
-
 @app.router(r'/login/(.*)/$')
 @token_auth
 def login(request, name):
     return Response("<h1>Welcome, {name}!</h1>".format(name=name))
 
+@app.router(r'/hello/(.*)/$')
+def hello(request, name):
+    return "<h1>hello, {name}!</h1>".format(name=name)
 
 @app.router(r'/logout/(.*)/$')
 @token_auth
