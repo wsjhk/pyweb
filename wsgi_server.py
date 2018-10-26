@@ -164,6 +164,7 @@ class WSGIServer(object):
                     inputs.append(connection)
                 else:
                     self.queue.put(s)
+                    # 入队列之后需要从inputs列表中remove掉，否则会循环不断put到队列中
                     inputs.remove(s)
 
     # def init_signals(self):
