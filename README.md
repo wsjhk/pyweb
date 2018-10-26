@@ -5,7 +5,7 @@
 
   1.实现小型的web服务器，可以接受http请求并响应，可解析http头,函数返回可以是对象也可以是其他类型数据。
   
-  2.小型web服务器实现master+worker模式,master负责监听socket,worker负责处理socket数据,实现了两种多线程的方式，一种是每个线程都accept()操作,该操作会导致阻塞,并发不高;另一种是使用select模式主进程执行accept(),然后使用队列分配连接的socket到每个worker去接收数据和处理返回,这样简单处理了惊群效应(linux2.6内核之后已经修复该问题),并且worker是轮询的负载均衡,性能提升不少。
+  2.小型web服务器实现master+worker模式,master负责监听socket,worker负责处理socket数据,实现了两种多线程的方式，一种是每个线程都accept()操作,该操作会导致阻塞,存在惊群效应,并发不高;另一种是使用select模式主进程执行accept(),然后使用队列分配连接的socket到每个worker去接收数据和处理返回,这样简单处理了惊群效应(linux2.6内核之后已经修复该问题),并且worker是轮询的负载均衡,性能提升不少。
   
   3.实现小型web框架,简单封装request和response,封装成app处理web服务器http请求。
   
