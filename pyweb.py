@@ -1,24 +1,96 @@
 # -*- coding: utf-8 -*-
 
 import re, datetime, json, hashlib, time, traceback
-from six.moves import http_client
-from six.moves import urllib
-from wsgiref.headers import Headers
 from wsgi_server import WSGIServer
 from middleware import TestMiddle, get_validate
 from urls import URLpattern
 
 
+HTTP_STATUS_CODE = {
+    100: 'Continue',
+    101: 'Switching Protocols',
+
+    200: 'OK',
+    201: 'Created',
+    202: 'Accepted',
+    203: 'Non-Authoritative Information',
+    204: 'No Content',
+    205: 'Reset Content',
+    206: 'Partial Content',
+
+    300: 'Multiple Choices',
+    301: 'Moved Permanently',
+    302: 'Found',
+    303: 'See Other',
+    304: 'Not Modified',
+    305: 'Use Proxy',
+    306: '(Unused)',
+    307: 'Temporary Redirect',
+
+    400: 'Bad Request',
+    401: 'Unauthorized',
+    402: 'Payment Required',
+    403: 'Forbidden',
+    404: 'Not Found',
+    405: 'Method Not Allowed',
+    406: 'Not Acceptable',
+    407: 'Proxy Authentication Required',
+    408: 'Request Timeout',
+    409: 'Conflict',
+    410: 'Gone',
+    411: 'Length Required',
+    412: 'Precondition Failed',
+    413: 'Request Entity Too Large',
+    414: 'Request-URI Too Long',
+    415: 'Unsupported Media Type',
+    416: 'Requested Range Not Satisfiable',
+    417: 'Expectation Failed',
+
+    500: 'Internal Server Error',
+    501: 'Not Implemented',
+    502: 'Bad Gateway',
+    503: 'Service Unavailable',
+    504: 'Gateway Timeout',
+    505: 'HTTP Version Not Supported',
+}
+
 def routers():
     return URLpattern
 
-class UppercaseMiddleware(object):
-    def __init__(self, app):
-        self.app = app
+class Headers:
+    def __init__(self,headers):
+        if type(headers) is not list:
+            raise TypeError("Headers must be a list of name/value tuples")
+        self._headers = headers
+        self.tspecials = re.compile(r'[ \(\)<>@,;:\\"/\[\]\?=]')
 
-    def __call__(self, environ, start_response):
-        for data in self.app(environ, start_response):
-            yield data.upper()
+    def _formatparam(self, param, value=None, quote=1):
+        """Convenience function to format and return a key=value pair.
+
+        This will quote the value if needed or if quote is true.
+        """
+        if value is not None and len(value) > 0:
+            if quote or self.tspecials.search(value):
+                value = value.replace('\\', '\\\\').replace('"', r'\"')
+                return '%s="%s"' % (param, value)
+            else:
+                return '%s=%s' % (param, value)
+        else:
+            return param
+
+    def items(self):
+        return self._headers[:]
+
+    def add_header(self, _name, _value, **_params):
+        parts = []
+        if _value is not None:
+            parts.append(_value)
+        for k, v in _params.items():
+            if v is None:
+                parts.append(k.replace('_', '-'))
+            else:
+                parts.append(self._formatparam(k.replace('_', '-'), v))
+        self._headers.append((_name, "; ".join(parts)))
 
 
 class Request(object):
@@ -31,13 +103,15 @@ class Request(object):
 
     @property
     def args(self):
-        """ 把查询参数转成字典形式 """
-        get_arguments = urllib.parse.parse_qs(self.environ['QUERY_STRING'])
-        return {k: v[0] for k, v in get_arguments.items()}
+        return self.environ
 
     @property
     def header(self):
         return self.environ['headers']
+
+    @property
+    def method(self):
+        return self.environ['REQUEST_METHOD']
 
 
 class Response(object):
@@ -51,7 +125,7 @@ class Response(object):
 
     @property
     def status(self):
-        status_string = http_client.responses.get(self._status, 'UNKNOWN')
+        status_string = HTTP_STATUS_CODE.get(self._status, 'UNKNOWN')
         return '{status} {status_string}'.format(status=self._status, status_string=status_string)
 
     def __iter__(self):
