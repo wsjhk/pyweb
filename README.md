@@ -9,7 +9,7 @@
   
   3.实现小型web框架,简单封装request和response,封装成app处理web服务器http请求。
   
-  4.小型web框架实现router系统,快速开发api应用。
+  4.小型web框架实现router系统,快速开发api应用,同时支持FBV和CBV两种模式。
   
   5.实现简单的测试中间件和token中间件，该web框架支持使用@token_auth实现api的token验证。
   
@@ -24,7 +24,7 @@
   
   4.web框架用协程实现异步。
   
-  5.路由系统实现CBV模式，类方法响应，目前是FBV。
+  5.路由系统同时支持CBV和FBV，urls路由表没有去重，使用时注意urls不要重复即可，改进的话添加url时进行判断再添加。
   
 
 
