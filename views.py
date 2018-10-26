@@ -43,3 +43,8 @@ class CBV(View):
     def post(self, request, name):
         method = request.method
         return "<h1>CBV {method}, {name}!</h1>".format(method = method, name = name)
+
+    
+    
+    
+    
