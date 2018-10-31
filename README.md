@@ -9,7 +9,7 @@
   
   3.实现小型web框架,简单封装request和response,封装成app处理web服务器http请求。
   
-  4.小型web框架实现router系统,快速开发api应用,同时支持FBV和CBV两种模式。
+  4.小型web框架实现router系统,快速开发api应用,同时支持FBV和CBV两种模式,实现了类似Jinja2的模板引擎功能，参考test.html文件，使用<%和%>来包含要执行的python代码和传递的变量值。
   
   5.实现简单的测试中间件和token中间件，该web框架支持使用@token_auth实现api的token验证。
   
@@ -18,13 +18,14 @@
 
   1.web服务器使用epoll模型,实现IO多路复用,master管理worker进程的加减，reload功能的实现。
   
-  2.实现访问模板等静态文件。
+  2.实现gzip文件压缩和缓存。
   
-  3.实现gzip文件压缩和缓存。
+  3.web框架用协程实现异步。
   
-  4.web框架用协程实现异步。
-  
-  5.路由系统同时支持CBV和FBV，urls路由表没有去重，使用时注意urls不要重复即可，改进的话添加url时进行判断再添加。
+
+注意：
+
+  *路由系统同时支持CBV和FBV，urls路由表没有去重，使用时注意urls不要重复即可，改进的话添加url时进行判断再添加。
   
 
 
