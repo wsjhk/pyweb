@@ -1,0 +1,11 @@
+<html>
+    <HEAD><TITLE><%=title%></TITLE></HEAD>
+    <BODY>
+        <% for item in data{ %>
+        <%=item["id"]%>,<%= item["name"] %>
+        array data:
+        <% for i in item["array"] {%><%= i %><%}%>
+        </br>
+        <%}%>
+    </BODY>
+</html>
