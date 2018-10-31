@@ -30,6 +30,6 @@
 
 运行：
 
-  直接运行myapp.py文件即可实现访问：http://127.0.0.1:8001/hello/wsjhk/ ,token访问需要用时postman工具或者curl等工具。
+  直接运行myapp.py文件即可实现访问：http://127.0.0.1:8001/hello/wsjhk/ ,token访问需要用postman工具或者curl等工具。
   
 
