@@ -13,8 +13,8 @@ def login(request, name):
 def hello(request, name):
     tpl = PyTpl(filepath="./test.html")
     data = []
-    data.append({"id": 1, "abc": "name1", "arr1": [2,4,6,8,10]})
-    data.append({"id": 2, "bcd": "name2", "arr2": [1,3,5,7,9]})
+    data.append({"id": 1, "name": "name1", "array": [2,4,6,8,10]})
+    data.append({"id": 2, "name": "name2", "array": [1,3,5,7,9]})
 
     tpl.assign("title", name)
     tpl.assign("data", data)
