@@ -9,7 +9,7 @@
   
   3.实现小型web框架,简单封装request和response,封装成app处理web服务器http请求。
   
-  4.小型web框架实现router系统,快速开发api应用,同时支持FBV和CBV两种模式,实现了类似Jinja2的模板引擎功能，参考test.html文件，使用<%和%>来包含要执行的python代码和传递的变量值。
+  4.小型web框架实现router系统,快速开发api应用,同时支持FBV和CBV两种模式,实现了类似Jinja2，cheetah（速度最快）的模板引擎功能，参考test.html文件，使用<%和%>来包含要执行的python代码和传递的变量值。
   
   5.实现简单的测试中间件和token中间件，该web框架支持使用@token_auth实现api的token验证。
   
