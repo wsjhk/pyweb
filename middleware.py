@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 import json, time, traceback, hashlib, base64, os, logging, logging.config
+from functools import wraps
 
 class TestMiddle(object):
     def __init__(self, application):
@@ -14,6 +15,7 @@ class TestMiddle(object):
         return self.application(environ, start_response)
 
 def token_auth(func):
+    @wraps(func)
     def wrapper(*arg, **kwargs):
         try:
             request = arg[0]
