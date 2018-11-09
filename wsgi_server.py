@@ -158,7 +158,7 @@ class WSGIServer(object):
             readable, writable, exceptional = select.select(inputs, outputs, inputs)
             for s in readable:
                 if s is self.socket:
-                    # 多进行多线程时惊群问题，Lock锁不能解决惊群问题，会使得惊群问题转移到unlock操作上。使用队列分配sock来解决惊群问题
+                    # 多进程多线程时惊群问题，Lock锁不能解决惊群问题，会使得惊群问题转移到unlock操作上。使用队列分配sock来解决惊群问题
                     connection, client_address = s.accept()
                     connection.setblocking(False)
                     inputs.append(connection)
