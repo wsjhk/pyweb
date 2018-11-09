@@ -16,7 +16,7 @@
   
 扩展方向：
 
-  1.web服务器使用epoll模型,实现IO多路复用,master管理worker进程的加减，reload功能的实现。
+  1.web服务器使用epoll模型,实现Linux版的IO多路复用,目前使用的select模型支持window和Linux,master管理worker进程的加减，reload功能的实现。
   
   2.实现gzip文件压缩和缓存。
   
